@@ -69,7 +69,7 @@ class ItrBFS:
             S = OPEN.pop(0)
             CLOSED.append(S)
 
-            if S.is_goal():
+            if self.Problem.GOAL_TEST(S):
                 print(self.Problem.GOAL_MESSAGE_FUNCTION(S))
                 self.PATH = [str(state) for state in self.backtrace(S)]
                 self.PATH_LENGTH = len(self.PATH) - 1
