@@ -137,7 +137,7 @@ def report(opn, closed, count):
 
 if __name__ == '__main__':
     if sys.argv == [''] or len(sys.argv) < 2:
-        Problem = "TowersOfHanoi"
+        Problem = "Farmer_Fox"
     else:
         Problem = sys.argv[1]
     DFS = ItrDFS(Problem)

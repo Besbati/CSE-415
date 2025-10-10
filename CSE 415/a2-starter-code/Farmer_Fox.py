@@ -115,7 +115,7 @@ class State:
         else:
             return False
 
-    def goal_message(s):
+    def goal_message(self):
         return "Congratulations! You have successfully moved the fox, chicken, and grain to the other side!"
 
 class Operator:
@@ -164,9 +164,9 @@ OPERATORS = [
 # Finish off with the GOAL_TEST and GOAL_MESSAGE_FUNCTION here.
 #<GOAL_TEST>
 GOAL_TEST = lambda s: s.is_goal()
-#</GOAL_TEST)
+#</GOAL_TEST>
 
 #<GOAL_MESSAGE_FUNCTION>
-GOAL_MESSAGE = lambda s: s.goal_message()
+GOAL_MESSAGE_FUNCTION = lambda s: s.goal_message()
 #</GOAL_MESSAGE_FUNCTION>
 
