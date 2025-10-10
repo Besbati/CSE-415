@@ -35,7 +35,7 @@ f = LEFT
 c = LEFT
 g = LEFT
 
-
+LEFT_RIGHT_ARRAY = ["Left", "Right"]
 
 
 class State:
@@ -64,10 +64,10 @@ class State:
         return True
 
     def __str__(self):
-        txt = "\n Farmer is on the: " + str(self.F)+"\n"
-        txt += "\n Fox is on the : " + str(self.f)+"\n"
-        txt += "\n Chicken is on the: " + str(self.c)+"\n"
-        txt += "\n Grain is on the: " + str(self.g)+"\n"
+        txt = "\n Farmer is on the: " + LEFT_RIGHT_ARRAY[self.F]+"\n"
+        txt += "\n Fox is on the : " + LEFT_RIGHT_ARRAY[self.f]+"\n"
+        txt += "\n Chicken is on the: " + LEFT_RIGHT_ARRAY[self.c]+"\n"
+        txt += "\n Grain is on the: " + LEFT_RIGHT_ARRAY[self.g]+"\n"
         return txt
 
     def __hash__(self):
