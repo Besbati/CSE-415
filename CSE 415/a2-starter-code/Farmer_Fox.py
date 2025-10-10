@@ -78,35 +78,35 @@ class State:
         # for use by operators in creating new states.
         return State(old=self)
 
-    def can_move(self, F, f, c, g):
+    def can_move(self, s):
         # check if new state is legal
-        if not self.is_legal(F, f, c, g):
+        if not self.is_legal(s):
             return False
         # check if farmer is moving alone
-        if self.F != F and self.f == f and self.c == c and self.g == g:
+        if self.F != s.F and self.f == s.f and self.c == s.c and self.g == s.g:
             return True
         # check if farmer is moving more than one thing (fox and chicken, fox and grain, chicken and grain)
-        if self.F != F and self.f != f and self.c != c and self.g == g:
+        if self.F != s.F and self.f != s.f and self.c != s.c and self.g == s.g:
             return False
-        if self.F != F and self.f != f and self.c == c and self.g != g:
+        if self.F != s.F and self.f != s.f and self.c == s.c and self.g != s.g:
             return False
-        if self.F != F and self.f == f and self.c != c and self.g != g:
-            return False
-        return True
-
-    def is_legal(self, F, f, c, g):
-        if f == c and F != f:
-            return False
-        if c == g and F != c:
+        if self.F != s.F and self.f == s.f and self.c != s.c and self.g != s.g:
             return False
         return True
 
-    def move(self, F, f, c, g):
+    def is_legal(self, s):
+        if s.f == s.c and s.F != s.f:
+            return False
+        if s.c == s.g and s.F != s.c:
+            return False
+        return True
+
+    def move(self, s):
         news = self.copy()
-        news.F = F
-        news.f = f
-        news.c = c
-        news.g = g
+        news.F = s.F
+        news.f = s.f
+        news.c = s.c
+        news.g = s.g
         return news
 
     def is_goal(self):
@@ -137,13 +137,36 @@ CREATE_INITIAL_STATE = lambda : State()
 
 # Put your OPERATORS section here.
 #<OPERATORS>
-Ffcg_combinations = [(F, None), (F, f), (F, c), (F, g)]
-
-OPERATORS = [Operator(
-    "Cross the river with "
-)]
-# etc.
-
+OPERATORS = [
+    Operator(
+        "Farmer crosses alone",
+        lambda s: s.can_move(1 - s.F, s.f, s.c, s.g),
+        lambda s: s.move(1 - s.F, s.f, s.c, s.g)
+    ),
+    Operator(
+        "Farmer crosses with fox",
+        lambda s: s.can_move(1 - s.F, 1 - s.f, s.c, s.g),
+        lambda s: s.move(1 - s.F, 1 - s.f, s.c, s.g)
+    ),
+    Operator(
+        "Farmer crosses with chicken",
+        lambda s: s.can_move(1 - s.F, s.f, 1 - s.c, s.g),
+        lambda s: s.move(1 - s.F, s.f, 1 - s.c, s.g)
+    ),
+    Operator(
+        "Farmer crosses with grain",
+        lambda s: s.can_move(1 - s.F, s.f, s.c, 1 - s.g),
+        lambda s: s.move(1 - s.F, s.f, s.c, 1 - s.g)
+    )
+]
+#</OPERATORS>
 
 # Finish off with the GOAL_TEST and GOAL_MESSAGE_FUNCTION here.
+#<GOAL_TEST>
+GOAL_TEST = lambda s: s.is_goal()
+#</GOAL_TEST)
+
+#<GOAL_MESSAGE_FUNCTION>
+GOAL_MESSAGE = lambda s: s.goal_message()
+#</GOAL_MESSAGE_FUNCTION>
 
