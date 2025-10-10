@@ -78,35 +78,35 @@ class State:
         # for use by operators in creating new states.
         return State(old=self)
 
-    def can_move(self, s):
+    def can_move(self, F, f, c, g):
         # check if new state is legal
-        if not self.is_legal(s):
+        if not self.is_legal(F, f, c, g):
             return False
         # check if farmer is moving alone
-        if self.F != s.F and self.f == s.f and self.c == s.c and self.g == s.g:
+        if self.F != F and self.f == f and self.c == c and self.g == g:
             return True
         # check if farmer is moving more than one thing (fox and chicken, fox and grain, chicken and grain)
-        if self.F != s.F and self.f != s.f and self.c != s.c and self.g == s.g:
+        if self.F != F and self.f != f and self.c != c and self.g == g:
             return False
-        if self.F != s.F and self.f != s.f and self.c == s.c and self.g != s.g:
+        if self.F != F and self.f != f and self.c == c and self.g != g:
             return False
-        if self.F != s.F and self.f == s.f and self.c != s.c and self.g != s.g:
-            return False
-        return True
-
-    def is_legal(self, s):
-        if s.f == s.c and s.F != s.f:
-            return False
-        if s.c == s.g and s.F != s.c:
+        if self.F != F and self.f == f and self.c != c and self.g != g:
             return False
         return True
 
-    def move(self, s):
+    def is_legal(self, F, f, c, g):
+        if f == c and F != f:
+            return False
+        if c == g and F != c:
+            return False
+        return True
+
+    def move(self, F, f, c, g):
         news = self.copy()
-        news.F = s.F
-        news.f = s.f
-        news.c = s.c
-        news.g = s.g
+        news.F = F
+        news.f = f
+        news.c = c
+        news.g = g
         return news
 
     def is_goal(self):
