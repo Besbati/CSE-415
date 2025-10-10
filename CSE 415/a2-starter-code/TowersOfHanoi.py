@@ -125,3 +125,7 @@ OPERATORS = [Operator("Move disk from " + str(p) + " to " + str(q),
 # <GOAL_MESSAGE_FUNCTION> (optional)
 GOAL_MESSAGE_FUNCTION = lambda s: goal_message(s)
 # </GOAL_MESSAGE_FUNCTION>
+
+#<GOAL_TEST>
+GOAL_TEST = lambda s: s.is_goal()
+#</GOAL_TEST>

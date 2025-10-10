@@ -69,7 +69,7 @@ class ItrBFS:
             S = OPEN.pop(0)
             CLOSED.append(S)
 
-            if S.is_goal():
+            if self.Problem.GOAL_TEST(S):
                 print(self.Problem.GOAL_MESSAGE_FUNCTION(S))
                 self.PATH = [str(state) for state in self.backtrace(S)]
                 self.PATH_LENGTH = len(self.PATH) - 1
@@ -83,17 +83,18 @@ class ItrBFS:
             for op in self.Problem.OPERATORS:
                 if op.is_applicable(S):
                     new_state = op.apply(S)
-                    if not (new_state in CLOSED):
+                    if not (new_state in CLOSED) and not (new_state in OPEN):
                         L.append(new_state)
                         self.BACKLINKS[new_state] = S
 
             # STEP 5. Delete from L any members of OPEN that occur on L.
             #         Insert all members of L at the *end* of OPEN.
             #         Note that this is the only step that differs from DFS.
-            for s2 in OPEN:
-                for i in range(len(L)):
-                    if s2 == L[i]:
-                        del L[i] # Change: Delete from L any members of OPEN that occur on L.
+            for s2 in range(len(L)):
+                for i in range(len(OPEN)):
+                    if L[s2] == OPEN[i]:
+                        del L[s2]
+                        s2 = s2 - 1
                         break
 
             OPEN = OPEN + L # Change: Insert all members of L at the *end* of OPEN.
