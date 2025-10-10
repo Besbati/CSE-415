@@ -2,8 +2,8 @@
 [STUDENTS: REPLACE THE FOLLOWING INFORMATION WITH YOUR
 OWN:]
 by Janet Jenson and Susan Lee
-UWNetIDs: jjens17, suelee01
-Student numbers: 1799999, 2599999
+UWNetIDs: besbati, royl14
+Student numbers: 2224560, 2422916
 
 Assignment 2, in CSE 415, Autumn 2025
  
@@ -27,6 +27,7 @@ PROBLEM_CREATION_DATE = "10-JAN-2025"
 #</METADATA>
 
 # Start your Common Code section here.
+#<COMMON_CODE>
 LEFT = 0
 RIGHT = 1
 F = LEFT
@@ -93,9 +94,6 @@ class State:
             return False
         return True
 
-
-
-
     def is_legal(self, F, f, c, g):
         if f == c and F != f:
             return False
@@ -103,11 +101,47 @@ class State:
             return False
         return True
 
-# Put your OPERATORS section here.
+    def move(self, F, f, c, g):
+        news = self.copy()
+        news.F = F
+        news.f = f
+        news.c = c
+        news.g = g
+        return news
+
+    def is_goal(self):
+        if self.F == RIGHT and self.f == RIGHT and self.c == RIGHT and self.g == RIGHT:
+            return True
+        else:
+            return False
+
+    def goal_message(s):
+        return "Congratulations! You have successfully moved the fox, chicken, and grain to the other side!"
 
 class Operator:
-    pass
+    def __init__(self, name, precond, state_transf):
+        self.name = name
+        self.precond = precond
+        self.state_transf = state_transf
 
+    def is_applicable(self, s):
+        return self.precond(s)
+
+    def apply(self, s):
+        return self.state_transf(s)
+#</COMMON_CODE>
+
+#<INITIAL_STATE>
+CREATE_INITIAL_STATE = lambda : State()
+#</INITIAL_STATE>
+
+# Put your OPERATORS section here.
+#<OPERATORS>
+Ffcg_combinations = [(F, None), (F, f), (F, c), (F, g)]
+
+OPERATORS = [Operator(
+    "Cross the river with "
+)]
 # etc.
 
 
