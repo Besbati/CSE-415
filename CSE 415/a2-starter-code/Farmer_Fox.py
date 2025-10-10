@@ -1,7 +1,7 @@
 '''Farmer_Fox.py
 [STUDENTS: REPLACE THE FOLLOWING INFORMATION WITH YOUR
 OWN:]
-by Janet Jenson and Susan Lee
+by Lucas Besbati and Roy Lee
 UWNetIDs: besbati, royl14
 Student numbers: 2224560, 2422916
 
