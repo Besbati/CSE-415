@@ -78,7 +78,16 @@ class State:
         return State(old=self)
 
     def can_move(self, F, f, c, g):
+        if not is_legal(F, f, c, g):
+            return False
+        return True
 
+    def is_legal(F, f, c, g):
+        if f == c and F != f:
+            return False
+        if c == g and F != c:
+            return False
+        return True
 
 # Put your OPERATORS section here.
 
