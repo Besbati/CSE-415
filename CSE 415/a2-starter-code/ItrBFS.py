@@ -83,7 +83,7 @@ class ItrBFS:
             for op in self.Problem.OPERATORS:
                 if op.is_applicable(S):
                     new_state = op.apply(S)
-                    if not (new_state in CLOSED):
+                    if not (new_state in CLOSED) and not (new_state in OPEN):
                         L.append(new_state)
                         self.BACKLINKS[new_state] = S
 

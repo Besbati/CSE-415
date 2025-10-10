@@ -141,10 +141,10 @@ OPERATORS = [Operator(
   for (h,r) in HR_combinations]
 #</OPERATORS>
 
-# <GOAL_MESSAGE_FUNCTION> (optional)
-GOAL_MESSAGE_FUNCTION = lambda s: goal_message(s)
-# </GOAL_MESSAGE_FUNCTION>
-
 #<GOAL_TEST>
 GOAL_TEST = lambda s: s.is_goal()
 #</GOAL_TEST>
+
+# <GOAL_MESSAGE_FUNCTION> (optional)
+GOAL_MESSAGE_FUNCTION = lambda s: goal_message()
+# </GOAL_MESSAGE_FUNCTION>
