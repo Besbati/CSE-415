@@ -78,11 +78,25 @@ class State:
         return State(old=self)
 
     def can_move(self, F, f, c, g):
-        if not is_legal(F, f, c, g):
+        # check if new state is legal
+        if not self.is_legal(F, f, c, g):
+            return False
+        # check if farmer is moving alone
+        if self.F != F and self.f == f and self.c == c and self.g == g:
+            return True
+        # check if farmer is moving more than one thing (fox and chicken, fox and grain, chicken and grain)
+        if self.F != F and self.f != f and self.c != c and self.g == g:
+            return False
+        if self.F != F and self.f != f and self.c == c and self.g != g:
+            return False
+        if self.F != F and self.f == f and self.c != c and self.g != g:
             return False
         return True
 
-    def is_legal(F, f, c, g):
+
+
+
+    def is_legal(self, F, f, c, g):
         if f == c and F != f:
             return False
         if c == g and F != c:
