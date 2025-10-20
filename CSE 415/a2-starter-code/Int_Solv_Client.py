@@ -102,7 +102,7 @@ def get_applicability_vector(s):
 
 def exit_client():
     print("Terminating Text_SOLUTION_Client session.")
-    log("Exiting")
+    print("Exiting")
     exit()
 
 
