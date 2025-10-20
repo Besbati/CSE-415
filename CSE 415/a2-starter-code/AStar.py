@@ -74,7 +74,7 @@ class AStar:
         self.OPEN = My_Priority_Queue()
         self.OPEN.insert(initial_state, 0)
         # STEP 1b. Assign g(s_0) to 0. Note that g ONLY tracks edge costs, not heuristics.
-        self.g[initial_state] = self.h(initial_state)
+        self.g[initial_state] = 0
 
         # STEP 2. If OPEN is empty, output “DONE” and stop.
         while len(self.OPEN) > 0:
@@ -91,7 +91,7 @@ class AStar:
             # put (S, P) on closed. Note that this is the PRIORITY value, including the heuristic.
             self.CLOSED[S] = P
 
-            if S.is_goal():
+            if self.Problem.GOAL_TEST(S):
                 print(self.Problem.GOAL_MESSAGE_FUNCTION(S))
                 self.PATH = [str(state) for state in self.backtrace(S)]
                 self.PATH_LENGTH = len(self.PATH) - 1

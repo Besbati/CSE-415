@@ -145,7 +145,7 @@ OPERATORS = [Operator("Move a tile "+str(dir)+" into the void",
 #</OPERATORS>
 
 #<GOAL_TEST> (optional)
-GOAL_TEST = lambda s: goal_test(s)
+GOAL_TEST = lambda s: s.is_goal()
 #</GOAL_TEST>
 
 #<GOAL_MESSAGE_FUNCTION> (optional)
