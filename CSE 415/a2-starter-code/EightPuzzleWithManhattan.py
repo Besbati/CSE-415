@@ -6,13 +6,6 @@ The particular heuristic is the Manhattan Distance (sum of horizontal and vertic
 
 from EightPuzzle import *
 
-LONGITUDE = {'Avignon': 48, 'Bordeaux': -6, 'Brest': -45, 'Caen': -4,
-             'Calais': 18, 'Dijon': 51, 'Grenoble': 57, 'Limoges': 12,
-             'Lyon': 48, 'Marseille': 53, 'Montpellier': 36, 'Nancy': 62,
-             'Nantes': -16, 'Nice': 73, 'Paris': 23, 'Rennes': -17,
-             'Strasbourg': 77, 'Toulouse': 14}
-
-
 def h(s):
     """We return the Manhattan distance of each tile from its goal position in s."""
     manhattan_distance = 0
