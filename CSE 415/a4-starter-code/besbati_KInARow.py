@@ -237,10 +237,105 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
     
 
     def static_eval(self, state, game_type=None):
-        print('calling static_eval. Its value needs to be computed!')
-        # Values should be higher when the states are better for X,
-        # lower when better for O.
-        return 0
+        board = state.board
+        k = game_type.k
+        mCols = game_type.m
+        nRows = game_type.n
+
+        eval_result = 0
+        for i in range(nRows):
+            eval_result += check_section(board, k, i, 0, 1, 0) # row
+            eval_result += check_section(board, k, i, 0, 1, 1) # diag right
+            eval_result += check_section(board, k, i, 0, -1, 1) # diag left
+        for j in range(mCols):
+            eval_result += check_section(board, k, 0, j, 0, 1) # column
+        
+        return eval_result
+    
+    def check_section(board, k, row, col, rowStep, colStep): # rowStep can be 1, 0 or -1, colstep 1 or 0
+        if rowStep * k + row > len(board):
+            return 0
+        if colStep * k + col > len(board[0]):
+            return 0
+        eval = 0
+
+        leftSpaceStreak = 0
+        mainStreak = 0
+        rightSpaceStreak = 0
+        streakItem = ''
+
+        i = 0
+        while (rowStep * i + row < len(board) and colStep * i + col < len(board[0])):
+            curr = board[rowStep * i + row][colStep * i + col]
+            if curr == ' ':
+                if mainStreak > 0: # X - < right side
+                    rightSpaceStreak += 1
+                else: # - X < left side
+                    leftSpaceStreak += 1
+
+            if curr == 'X' or curr == 'Y':
+                if curr != streakItem: # - - - X - O
+                    # conclude the last streak
+                    addAmount = 0
+                    if rightSpaceStreak + leftSpaceStreak + mainStreak >= k: # guarantee possible placement
+                        addAmount += pow(10, streak)
+                    if rightSpaceStreak > 0 and leftSpaceStreak > 0: # bonus points for both sides availability
+                        addAmount *= 5
+                    if streakItem == 'X':
+                        eval += addAmount
+                    if streakItem == 'Y':
+                        eval -= addAmount
+                    # switch to new streak
+                    streakItem = curr
+                    mainStreak = 1
+                    leftSpaceStreak = rightSpaceStreak
+                    rightSpaceStreak = 0
+
+                if curr == streakItem:
+                    streak += 1
+                    if streak == k:
+                        if streakItem == 'X':
+                            eval += pow(10, streak)
+                        if streakItem == 'Y':
+                            eval -= pow(10, streak)
+                        streakItem = ''
+                        mainStreak = 0
+                        leftSpaceStreak = 0
+                        rightSpaceStreak = 0
+            
+            if curr == '-':
+                # conclude the last streak
+                addAmount = 0
+                if rightSpaceStreak + leftSpaceStreak + mainStreak >= k: # guarantee possible placement
+                    addAmount += pow(10, streak)
+                if rightSpaceStreak > 0 and leftSpaceStreak > 0: # bonus points for both sides availability
+                    addAmount *= 5
+                if streakItem == 'X':
+                    eval += addAmount
+                if streakItem == 'Y':
+                    eval -= addAmount
+                # reset
+                streakItem = ''
+                mainStreak = 0
+                leftSpaceStreak = 0
+                rightSpaceStreak = 0
+        
+        # conclude the final streak if there is one
+        addAmount = 0
+        if rightSpaceStreak + leftSpaceStreak + mainStreak >= k: # guarantee possible placement
+            addAmount += pow(10, streak)
+        if rightSpaceStreak > 0 and leftSpaceStreak > 0: # bonus points for both sides availability
+            addAmount *= 5
+        if streakItem == 'X':
+            eval += addAmount
+        if streakItem == 'Y':
+            eval -= addAmount
+        
+        return eval
+
+        
+
+
  
 # OPTIONAL THINGS TO KEEP TRACK OF:
 def other(p):
