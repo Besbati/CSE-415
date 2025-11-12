@@ -112,7 +112,36 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
 
             for move, child_state in move_gen(current_state):
                 result = self.minimax(child_state, max_ply - 1, pruning=True, alpha=alpha, beta=beta)
-                child_val = 
+                child_val = result[0]
+
+                if current_state.whose_move == "X":
+                    if child_val > best_val:
+                        best_val = child_val
+                        best_move = move
+                    alpha = max(alpha, best_val)
+                else:
+                    if child_val < best_val:
+                        best_val = child_val
+                        best_move = move
+                    beta = min(beta, best_val)
+        else:
+            for move, child_state in move_gen(current_state):
+                result = self.minimax(child_state, max_ply - 1, pruning=False)
+                child_val = result[0]
+                
+                if current_state.whose_move == "X":
+                    if child_val > best_val:
+                        best_val = child_val
+                        best_move = move
+                else:
+                    if child_val < best_val:
+                        best_val = child_val
+                        best_move = move
+        
+        if original_static_eval is not None:
+            self.static_eval = original_static_eval
+        
+        new_state = do_move(current_state, best_move[0], best_move[1], other(current_state.whose_move))
         # Here's a placeholder:
         # a_default_move = (0, 0)  This might be legal ONCE in a game,
         # if the square is not forbidden or already occupied.
@@ -120,11 +149,13 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
         # new_state = current_state # This is not allowed, and even if
         # it were allowed, the newState should be a deep COPY of the old.
     
-        new_remark = "I need to think of something appropriate.\n" +\
-        "Well, I guess I can say that this move is probably illegal."
+        new_remark = "I'm done... for now."
 
-        print("Returning from make_move")
-        return [[a_default_move, new_state], new_remark]
+        if self.playing_mode == KAgent.AUTOGRADER:
+            stats = [self.alpha_beta_cutoffs_this_turn, self.num_static_evals_this_turn, self.zobrist_table_num_entries_this_turn, self.zobrist_table_num_hits_this_turn]
+            return [[best_move, new_state] + stats, new_remark]
+        else:
+            return [[best_move, new_state], new_remark]
 
     # The main adversarial search function:
     def minimax(self,
