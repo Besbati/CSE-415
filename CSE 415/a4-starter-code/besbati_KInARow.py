@@ -72,7 +72,7 @@ class OurAgent(KAgent):
         
         if utterances_matter and self.playing_mode == 0 and GEMINI_AVAILABLE:  # 0 = DEMO mode
             try:
-                genai.configure(api_key="PUT_YOUR_API_KEY_HERE")
+                genai.configure(api_key="AIzaSyDrcx3hW4x1cN2ZiV1ZrYTW8ENpZC3oTaQ")
                 self.llm = genai.GenerativeModel('gemini-pro')
                 self.llm_enabled = True
                 print("✅ LLM enabled")
