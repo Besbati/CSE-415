@@ -14,6 +14,11 @@ from game_types import State, Game_Type
 AUTHORS = 'Besbati, Lucas; Roy Lee' 
 UWNETIDS = ['besbati, royl14']
 
+try:
+    import google.generativeai as genai
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
 import time
 import game_types
 import math
@@ -39,6 +44,8 @@ class OurAgent(KAgent):
         self.zobrist_table_num_hits_this_turn = -1
         self.current_game_type = None
         self.playing_mode = KAgent.DEMO
+        self.llm_enabled = False
+        self.llm = None
         
         # Zobrist hashing structures
         self.zobrist_table = {}  # Hash -> (depth, value, move)
@@ -64,7 +71,8 @@ class OurAgent(KAgent):
         utterances_matter=True):
         
         if utterances_matter:
-            pass
+            genai.configure(api_key="AIzaSyDrcx3hW4x1cN2ZiV1ZrYTW8ENpZC3oTaQ")
+            self.llm = genai.GenerativeModel('gemini-pro')
         
         self.current_game_type = game_type
         self.what_side_to_play = what_side_to_play
@@ -122,6 +130,50 @@ class OurAgent(KAgent):
             self.zobrist_table[hash_value] = (depth, value, move)
             self.zobrist_writes += 1
 
+    def generate_utterance(self, game_state, opponent_said, my_move):
+        """Generate contextual utterance"""
+        
+        # Fallback if no LLM
+        if not self.llm_enabled:
+            fallbacks = [
+                "Calculated move.",
+                "Let's see how this plays out.",
+                "Strategic placement.",
+                "That should work."
+            ]
+            import random
+            return random.choice(fallbacks)
+        
+        # Build prompt
+        x_count = sum(row.count('X') for row in game_state.board)
+        o_count = sum(row.count('O') for row in game_state.board)
+
+        eval_score = self.static_eval(game_state)
+        if eval_score > 100:
+            position = "I'm winning"
+        elif eval_score < -100:
+            position = "I'm losing"
+        else:
+            position = "It's even"
+        
+        prompt = f"""You are Dinklebot, sarcastic AI from Destiny.
+
+    Game situation:
+    - Board has {x_count} X's and {o_count} O's
+    - Position: {position}
+    - You just moved to position {my_move}
+    - Opponent said: "{opponent_said}"
+
+    Respond in 1-2 sentences. Be witty and in-character (sarcastic but not mean).
+
+    Your response:"""
+        
+        try:
+            response = self.llm.generate_content(prompt)
+            return response.text.strip()
+        except:
+            return "Interesting move."
+        
     def make_move(self, current_state, current_remark, time_limit=1000,
                     use_alpha_beta=True,
                     use_zobrist_hashing=False, max_ply=3,
@@ -163,7 +215,7 @@ class OurAgent(KAgent):
         
         new_state = do_move(current_state, best_move[0], best_move[1], other(current_state.whose_move))
         
-        new_remark = "I'm done... for now." #commit check
+        new_remark = self.generate_utterance(current_state, current_remark, best_move)
 
         # Update zobrist statistics
         self.zobrist_table_num_entries_this_turn = len(self.zobrist_table)
