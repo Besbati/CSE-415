@@ -186,7 +186,7 @@ def test():
 
     #import yourUWNetID_KInARow as h
     import besbati_KInARow as h
-    import flynger_agent_KInARow as r
+    import charlez_agent_KInARow as r
     px = h.OurAgent()
     po = r.OurAgent() #h.OurAgent(twin=True) # r.OurAgent() # h.OurAgent(twin=True)
     set_players(px, po)
