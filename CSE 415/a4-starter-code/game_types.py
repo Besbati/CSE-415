@@ -98,6 +98,18 @@ FIAR = Game_Type("Five-in-a-Row on a Seven-by-Seven Board with Corners Forbidden
                  45,
                  0.25)
 
+TOWER_INITIAL_STATE_DATA = \
+              [[[' ',' ',' ', ' '] for i in range(7)], "X"]
+
+TOWER = Game_Type("4 by 7 with 4 in a row",
+                 "3-in-a-Row",
+                 4,
+                 7,
+                 4,
+                 TOWER_INITIAL_STATE_DATA,
+                 45,
+                 0.25)
+
 CASSINI_INITIAL_STATE_DATA = \
               [[[' ',' ',' ',' ',' ',' ',' ',' '],
                 [' ','O',' ',' ',' ',' ',' ',' '],

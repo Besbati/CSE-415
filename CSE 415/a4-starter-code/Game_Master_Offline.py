@@ -15,7 +15,7 @@ if USE_HTML: import gameToHTML
 
 from winTesterForK import winTesterForK
 
-from game_types import TTT, FIAR, Cassini
+from game_types import TTT, FIAR, Cassini, TOWER
 
 TIME_PER_MOVE = 1.0 # In seconds
 INITIAL_STATE = TTT.initial_state
@@ -188,7 +188,7 @@ def test():
     import besbati_KInARow as h
     import flynger_agent_KInARow as r
     px = h.OurAgent()
-    po = r.OurAgent() # h.OurAgent(twin=True)
+    po = r.OurAgent() #h.OurAgent(twin=True) # r.OurAgent() # h.OurAgent(twin=True)
     set_players(px, po)
     print("Players are set.")
     print("Now let's run the game.")
