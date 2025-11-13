@@ -14,11 +14,12 @@ TO PROVIDE A GOOD STRUCTURE FOR YOUR IMPLEMENTATION.
 
 from agent_base import KAgent
 from game_types import State, Game_Type
+from charlez.charlez_staticEvals import expensive_staticEval, cheap_staticEval
 
 AUTHORS = 'Lucas Besbati, Roy Lee' 
 UWNETIDS = ['besbati'] # The first UWNetID here should
 # match the one in the file name, e.g., janiesmith99_KInARow.py.
-DIRECTIONS = [(1, 0), (0, 1), (1, 1), (-1, 1)]
+
 import time # You'll probably need this to avoid losing a
 # game due to exceeding a time limit.
 import game_types
@@ -190,66 +191,38 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
         # etc. 
     
 
-    def static_eval(self, state, game_type=None):
-        # Values should be higher when the states are better for X,
-        # lower when better for O.
-        #if zHashing:
-        #    hash = self._zobristHash(state)
-        #    if hash in self._zobristTable:
-        #        return self._zobristTable.get(hash)
-        score = 0
-        board = state.board
+    # I went with the first static eval described in WE-2!
+    def static_eval(self, state, game_type=None) -> float:
         if game_type ==None:
             game_type = self.current_game_type
-        k, m, n = game_type.k, game_type.m, game_type.n
+        # Always increment this by 1.
+        #self.static_eval_calls += 1
+        #self.recent_static_eval_calls += 1
+        # if zHashing:
+        #     hash_val: int = self._zHash(state)
+        #     # If it already exists in our Zobrist hash table, just return it!
+        #     # Yes, this currently implementation doesn't resolve collisions.
+        #     if hash_val in self.zTable:
+        #         # A (presumably) successful zTable lookup!
+        #         self.zHash_lookups += 1
+        #         self.recent_zHash_lookups += 1
+        #         return self.zTable.get(hash_val)
 
-        for y in range(n):
-            for x in range(m):
-                if board[y][x] == "-":
-                    continue
-
-                for dx, dy in DIRECTIONS:
-                    # Check sequences for X
-                    count = self._check_line(board, m, n, k, x, y, dx, dy, "X")
-                    if count == k:
-                        return float('inf')
-                    elif count >= 1:
-                        score += 2 ** count
-
-                    # Check sequences for O
-                    count = self._check_line(board, m, n, k, x, y, dx, dy, "O")
-                    if count == k:
-                        return float('-inf')
-                    elif count >= 1:
-                        score -= 2 ** count
-
-        #if zHashing:
-        #    self._zobristTable[self._zobristHash(state)] = score
-
-        return score
-    
-    """
-    Helper functions
-    """
-    
-    # Used for computing value of a line in the static eval function
-    def _check_line(self, board, m, n, k, start_x, start_y, dx, dy, who):
-        count = 0
-        x, y = start_x, start_y
-        end_x, end_y = x + dx * (k - 1), y + dy * (k - 1)
-
-        if 0 <= end_x < m and 0 <= end_y < n:
-            for _ in range(k):
-                if board[y][x] == who:
-                    count += 1
-                elif board[y][x] == " ":
-                    count += 1 / (2 * k)
-                else:
-                    return 0
-                x += dx
-                y += dy
-
-        return count
+        # Not in our zTable? We have to do a computation.
+        #self.static_eval_computations += 1
+        #self.recent_static_eval_computations += 1
+        val: float
+        # As it turns out, I created two static evaluation functions.
+        # As such, I can give the old one to my twin!
+        if self.twin:
+            val = cheap_staticEval(state)
+        else:
+            val = expensive_staticEval(state, game_type.k)
+        # If using Zobrist hashing, insert the hashcode and value.
+        # if zHashing:
+        #     hash_val: int = self._zHash(state)
+        #     self.zTable[hash_val] = val
+        return val
     
     def addScore(self, k, rightSpaceStreak, leftSpaceStreak, mainStreak,streakItem):
         if mainStreak == 0:

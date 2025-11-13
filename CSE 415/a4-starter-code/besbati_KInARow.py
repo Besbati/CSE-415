@@ -124,7 +124,7 @@ class OurAgent(KAgent):
 
     def make_move(self, current_state, current_remark, time_limit=1000,
                     use_alpha_beta=True,
-                    use_zobrist_hashing=False, max_ply=3,
+                    use_zobrist_hashing=True, max_ply=3,
                     special_static_eval_fn=None):
         print("make_move has been called")
 
@@ -282,6 +282,13 @@ class OurAgent(KAgent):
             eval_result += self.check_section(board, k, i, 0, 0, 1)  # row
             if eval_result == INF or eval_result == -INF:
                 return eval_result
+            if i > 0:
+                eval_result += self.check_section(board, k, i, 0, 1, 1)  # diag right
+                if eval_result == INF or eval_result == -INF:
+                    return eval_result
+                eval_result += self.check_section(board, k, i, mCols - 1, 1, -1)  # diag left
+                if eval_result == INF or eval_result == -INF:
+                    return eval_result
         for j in range(mCols):
             eval_result += self.check_section(board, k, 0, j, 1, 0)  # column
             if eval_result == INF or eval_result == -INF:
