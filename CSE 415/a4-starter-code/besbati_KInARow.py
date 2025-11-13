@@ -101,11 +101,14 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
             self.static_eval = special_static_eval_fn
         
         print("Calling minimax, please defend me while I compute the value.")
-        best_move, _ = self.minimax(current_state, max_ply, True)
+        best_move, val = self.minimax(current_state, max_ply, True)
         
         if original_static_eval is not None:
             self.static_eval = original_static_eval
         
+        if not best_move:
+            print(current_state)
+            print(val)
         new_state = do_move(current_state, best_move[0], best_move[1], other(current_state.whose_move))
         # Here's a placeholder:
         # a_default_move = (0, 0)  This might be legal ONCE in a game,
@@ -131,10 +134,10 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
             beta=INF):
         
         child_states = move_gen(state)
+        self.num_static_evals_this_turn += 1
         current_eval = self.static_eval(state)
 
-        if depth_remaining == 0 or not child_states or current_eval == INF or current_eval == -INF: 
-            self.num_static_evals_this_turn += 1
+        if depth_remaining == 0 or not child_states or current_eval == INF or current_eval == -INF:
             return None, current_eval
 
         if state.whose_move == "X":
@@ -156,10 +159,10 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
                         beta = min(beta, best_val)
                     if alpha >= beta:
                         self.alpha_beta_cutoffs_this_turn += 1
-                        return result
+                        return best_move, child_val
                 best_move = move
                 best_val = child_val
-
+        
         return best_move, best_val
 
 
