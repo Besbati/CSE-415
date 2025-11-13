@@ -100,43 +100,8 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
             original_static_eval = self.static_eval
             self.static_eval = special_static_eval_fn
         
-        best_move = None
-        if current_state.whose_move == "X":
-            best_val = -INF
-        else:
-            best_val = INF
-        
-        if use_alpha_beta:
-            alpha = -INF
-            beta = INF
-
-            for move, child_state in move_gen(current_state):
-                result = self.minimax(child_state, max_ply - 1, pruning=True, alpha=alpha, beta=beta)
-                child_val = result[0]
-
-                if current_state.whose_move == "X":
-                    if child_val > best_val:
-                        best_val = child_val
-                        best_move = move
-                    alpha = max(alpha, best_val)
-                else:
-                    if child_val < best_val:
-                        best_val = child_val
-                        best_move = move
-                    beta = min(beta, best_val)
-        else:
-            for move, child_state in move_gen(current_state):
-                result = self.minimax(child_state, max_ply - 1, pruning=False)
-                child_val = result[0]
-                
-                if current_state.whose_move == "X":
-                    if child_val > best_val:
-                        best_val = child_val
-                        best_move = move
-                else:
-                    if child_val < best_val:
-                        best_val = child_val
-                        best_move = move
+        print("Calling minimax, please defend me while I compute the value.")
+        best_move, _ = self.minimax(current_state, max_ply, True)
         
         if original_static_eval is not None:
             self.static_eval = original_static_eval
@@ -162,68 +127,40 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
             state,
             depth_remaining,
             pruning=False,
-            alpha=None,
-            beta=None):
+            alpha=-INF,
+            beta=INF):
         
+        child_states = move_gen(state)
+        current_eval = self.static_eval(state)
 
-        print("Calling minimax, please defend me while I compute the value.")
-        if depth_remaining == 0: 
+        if depth_remaining == 0 or not child_states or current_eval == INF or current_eval == -INF: 
             self.num_static_evals_this_turn += 1
-            return [self.static_eval(state)]
-        
-        # Code for when pruning == True
-        if pruning:
-            if alpha is None:
-                alpha = -INF
-            if beta is None:
-                beta = INF
+            return None, current_eval
 
-            if state.whose_move == "X":
-                best_val = -INF
-                for move, child_state in move_gen(state):
-                    result = self.minimax(child_state, depth_remaining - 1, pruning = True, alpha = alpha, beta = beta)
-                    child_val = result[0]
+        if state.whose_move == "X":
+            compare_function = lambda a, b: a >= b
+            best_val = -INF
+        else: # "O" player
+            compare_function = lambda a, b: a <= b
+            best_val = INF
+        best_move = None
+        for move, child_state in child_states:
+            result = self.minimax(child_state, depth_remaining - 1, pruning = True, alpha = alpha, beta = beta)
+            child_val = result[1]
 
-                    if child_val > best_val:
-                        best_val = child_val
-
-                    alpha = max(alpha, best_val)
+            if compare_function(child_val, best_val):
+                if pruning:
+                    if state.whose_move == "X":
+                        alpha = max(alpha, best_val)
+                    else:
+                        beta = min(beta, best_val)
                     if alpha >= beta:
                         self.alpha_beta_cutoffs_this_turn += 1
-                        break
+                        return result
+                best_move = move
+                best_val = child_val
 
-                return best_val
-            
-            else: # "O" player
-                best_val = INF
-                for (move, child_state) in move_gen(state):
-                    result = self.minimax(child_state, depth_remaining - 1, pruning = True, alpha = alpha, beta = beta)
-                    child_val = result[0]
-
-                    if child_val < best_val:
-                        best_val = child_val
-
-                    beta = min(beta, best_val)
-                    if alpha >= beta:
-                        self.alpha_beta_cutoffs_this_turn += 1
-                        break
-                return best_val
-            
-        # minimax search no pruning 
-        else:
-            if state.whose_move == "X":
-                best_val = -INF
-            else:
-                best_val = INF
-            
-            for (move, child_state) in move_gen(state):
-                result = self.minimax(child_state, depth_remaining - 1, Pruning = False, alpha = None, beta = None)
-                child_val = result[0]
-                
-                if ((state.whose_move == "X" and child_val > best_val) or (state.whose_move == "O" and child_val < best_val)):
-                    best_val = child_val
-
-            return best_val
+        return best_move, best_val
 
 
         # default_score = 0 # Value of the passed-in state. Needs to be computed.
@@ -238,21 +175,33 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
 
     def static_eval(self, state, game_type=None):
         board = state.board
+        if game_type ==None:
+            game_type = self.current_game_type
         k = game_type.k
         mCols = game_type.m
         nRows = game_type.n
 
         eval_result = 0
         for i in range(nRows):
-            eval_result += check_section(board, k, i, 0, 1, 0) # row
-            eval_result += check_section(board, k, i, 0, 1, 1) # diag right
-            eval_result += check_section(board, k, i, 0, -1, 1) # diag left
+            eval_result += self.check_section(board, k, i, 0, 0, 1) # row
+            if eval_result == INF or eval_result == -INF:
+                return eval_result
         for j in range(mCols):
-            eval_result += check_section(board, k, 0, j, 0, 1) # column
-        
+            eval_result += self.check_section(board, k, 0, j, 1, 0) # column
+            if eval_result == INF or eval_result == -INF:
+                return eval_result
+            eval_result += self.check_section(board, k, 0, j, 1, 1) # diag right
+            if eval_result == INF or eval_result == -INF:
+                return eval_result
+            eval_result += self.check_section(board, k, 0, j, 1, -1) # diag left
+            if eval_result == INF or eval_result == -INF:
+                return eval_result
+        #print(state)
+        #print(eval_result)
+
         return eval_result
     
-    def check_section(board, k, row, col, rowStep, colStep): # rowStep can be 1, 0 or -1, colstep 1 or 0
+    def check_section(self, board, k, row, col, rowStep, colStep): # rowStep can be 1, 0 or -1, colstep 1 or 0
         if rowStep * k + row > len(board):
             return 0
         if colStep * k + col > len(board[0]):
@@ -265,74 +214,58 @@ class OurAgent(KAgent):  # Keep the class name "OurAgent" so a game master
         streakItem = ''
 
         i = 0
-        while (rowStep * i + row < len(board) and colStep * i + col < len(board[0])):
+        while (rowStep * i + row < len(board) and colStep * i + col < len(board[0]) and colStep * i + col >= 0):
             curr = board[rowStep * i + row][colStep * i + col]
             if curr == ' ':
-                if mainStreak > 0: # X - < right side
-                    rightSpaceStreak += 1
-                else: # - X < left side
-                    leftSpaceStreak += 1
+                #if mainStreak > 0: # X - < right side
+                rightSpaceStreak += 1
+                #else: # - X < left side
+                    #leftSpaceStreak += 1
 
-            if curr == 'X' or curr == 'Y':
+            elif curr == 'X' or curr == 'O':
                 if curr != streakItem: # - - - X - O
                     # conclude the last streak
-                    addAmount = 0
-                    if rightSpaceStreak + leftSpaceStreak + mainStreak >= k: # guarantee possible placement
-                        addAmount += pow(10, streak)
-                    if rightSpaceStreak > 0 and leftSpaceStreak > 0: # bonus points for both sides availability
-                        addAmount *= 5
-                    if streakItem == 'X':
-                        eval += addAmount
-                    if streakItem == 'Y':
-                        eval -= addAmount
+                    eval += self.addScore(k, rightSpaceStreak, leftSpaceStreak, mainStreak,streakItem)
                     # switch to new streak
                     streakItem = curr
                     mainStreak = 1
                     leftSpaceStreak = rightSpaceStreak
                     rightSpaceStreak = 0
-
-                if curr == streakItem:
-                    streak += 1
-                    if streak == k:
+                else:
+                    mainStreak += 1
+                    if mainStreak == k:
                         if streakItem == 'X':
-                            eval += pow(10, streak)
-                        if streakItem == 'Y':
-                            eval -= pow(10, streak)
-                        streakItem = ''
-                        mainStreak = 0
-                        leftSpaceStreak = 0
-                        rightSpaceStreak = 0
+                            return INF
+                        if streakItem == 'O':
+                            return -INF
             
-            if curr == '-':
+            else:
                 # conclude the last streak
-                addAmount = 0
-                if rightSpaceStreak + leftSpaceStreak + mainStreak >= k: # guarantee possible placement
-                    addAmount += pow(10, streak)
-                if rightSpaceStreak > 0 and leftSpaceStreak > 0: # bonus points for both sides availability
-                    addAmount *= 5
-                if streakItem == 'X':
-                    eval += addAmount
-                if streakItem == 'Y':
-                    eval -= addAmount
+                eval += self.addScore(k, rightSpaceStreak, leftSpaceStreak, mainStreak,streakItem)
                 # reset
                 streakItem = ''
                 mainStreak = 0
                 leftSpaceStreak = 0
                 rightSpaceStreak = 0
+            i += 1
         
         # conclude the final streak if there is one
-        addAmount = 0
-        if rightSpaceStreak + leftSpaceStreak + mainStreak >= k: # guarantee possible placement
-            addAmount += pow(10, streak)
-        if rightSpaceStreak > 0 and leftSpaceStreak > 0: # bonus points for both sides availability
-            addAmount *= 5
-        if streakItem == 'X':
-            eval += addAmount
-        if streakItem == 'Y':
-            eval -= addAmount
+        eval += self.addScore(k, rightSpaceStreak, leftSpaceStreak, mainStreak,streakItem)
         
         return eval
-
+    
+    def addScore(self, k, rightSpaceStreak, leftSpaceStreak, mainStreak,streakItem):
+        if mainStreak == 0:
+            return 0
+        addAmount = 0
+        if rightSpaceStreak + leftSpaceStreak + mainStreak >= k: # guarantee possible placement
+            addAmount += pow(10, mainStreak)
+            if rightSpaceStreak > 0 and leftSpaceStreak > 0: # bonus points for both sides availability
+                addAmount *= 2
+        if streakItem == 'X':
+            return addAmount
+        else:
+            return -addAmount
         
 
 
@@ -358,10 +291,10 @@ def move_gen(state):
             yield [(i, j), news]
 
 def do_move(state, i, j, o):
-            news = game_types.State(old=state)
-            news.board[i][j] = state.whose_move
-            news.whose_move = o
-            return news
+    news = game_types.State(old=state)
+    news.board[i][j] = state.whose_move
+    news.whose_move = o
+    return news
 
 #  WHO_MY_OPPONENT_PLAYS = other(WHO_I_PLAY)
 #  MY_PAST_UTTERANCES = []
