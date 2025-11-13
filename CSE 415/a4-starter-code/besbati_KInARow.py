@@ -70,9 +70,14 @@ class OurAgent(KAgent):
         expected_time_per_move=0.1,
         utterances_matter=True):
         
-        if utterances_matter:
-            genai.configure(api_key="AIzaSyDrcx3hW4x1cN2ZiV1ZrYTW8ENpZC3oTaQ")
-            self.llm = genai.GenerativeModel('gemini-pro')
+        if utterances_matter and self.playing_mode == 0 and GEMINI_AVAILABLE:  # 0 = DEMO mode
+            try:
+                genai.configure(api_key="PUT_YOUR_API_KEY_HERE")
+                self.llm = genai.GenerativeModel('gemini-pro')
+                self.llm_enabled = True
+                print("✅ LLM enabled")
+            except Exception as e:
+                print(f"⚠️ LLM failed: {e}")
         
         self.current_game_type = game_type
         self.what_side_to_play = what_side_to_play
